@@ -94,20 +94,34 @@ namespace StudentAPI.Controllers
         }
 
         // POST: api/StudentSubjects
+        // POST: api/StudentSubjects
         [ResponseType(typeof(StudentSubject))]
-        public IHttpActionResult PostStudentSubject(StudentSubject[] studentSubject)
+        public IHttpActionResult PostStudentSubject(StudentSubject studentSubject)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            //  db.StudentSubject.Add(studentSubject);
+            db.StudentSubject.Add(studentSubject);
 
+            try
+            {
+                db.SaveChanges();
+            }
+            catch (DbUpdateException)
+            {
+                if (StudentSubjectExists(studentSubject.StdId))
+                {
+                    return Conflict();
+                }
+                else
+                {
+                    throw;
+                }
+            }
 
-            db.StudentSubject.AddRange(studentSubject);
-            db.SaveChanges();
-            return CreatedAtRoute("DefaultApi", new {  }, studentSubject);
+            return CreatedAtRoute("DefaultApi", new { id = studentSubject.StdId }, studentSubject);
         }
 
         // DELETE: api/StudentSubjects/5
